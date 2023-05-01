@@ -27,7 +27,7 @@ public class PostController {
         this.postService = postService;
     }
 
-    @RequestMapping("/hello")
+    @GetMapping("/hello")
     public String hello() {
         return "api is running";
     }

@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.springboot.blog.entity.Role;
 import com.springboot.blog.entity.User;
@@ -20,6 +21,7 @@ import com.springboot.blog.repository.UserRepository;
 import com.springboot.blog.security.JwtTokenProvider;
 import com.springboot.blog.service.AuthService;
 
+@Service
 public class AuthServiceimpl implements AuthService {
 
     private AuthenticationManager authenticationManager;
@@ -29,11 +31,12 @@ public class AuthServiceimpl implements AuthService {
     private JwtTokenProvider jwtTokenProvider;
 
     public AuthServiceimpl(AuthenticationManager authenticationManager, UserRepository userRepository,
-            RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+            RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -66,13 +69,14 @@ public class AuthServiceimpl implements AuthService {
         user.setName(registerDto.getName());
         user.setUsername(registerDto.getUsername());
         user.setEmail(registerDto.getEmail());
-        user.setPassword(registerDto.getPassword());
+        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
 
         Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName("ROLE_USER").get();
+        Role userRole = roleRepository.findByName("ROLE_ADMIN").get();
 
         roles.add(userRole);
         user.setRoles(roles);
+        userRepository.save(user);
 
         return "User Registered successfully";
     }
